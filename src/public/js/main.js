@@ -1,5 +1,6 @@
-const React = require("react");
-const ReactDom = require("react-dom");
+import React from "react";
+import ReactDom from "react-dom";
+import "../css/main.css";
 
 const App = () => <h1>Hello from microblog</h1>;
 
