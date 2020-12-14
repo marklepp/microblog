@@ -1,7 +1,16 @@
-import React from "react";
-import ReactDom from "react-dom";
-import "../css/main.css";
+const React = require("react");
+const ReactDom = require("react-dom");
+require("../css/main.css");
+const Userbar = require("./components/Userbar");
+const BlogContent = require("./components/BlogContent");
 
-const App = () => <h1>Hello from microblog</h1>;
+const App = () => {
+  return (
+    <>
+      <Userbar username="John Doe" />
+      <BlogContent />
+    </>
+  );
+};
 
 ReactDom.render(<App />, document.getElementById("root"));
