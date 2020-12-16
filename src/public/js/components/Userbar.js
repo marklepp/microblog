@@ -32,6 +32,16 @@ const PostForm = (props) => {
   );
 };
 
+const Actions = (props) => {
+  return (
+    <div className="userbar__actions">
+      <button className="microblog__button userbar__button userbar__action">
+        Find someone
+      </button>
+    </div>
+  );
+};
+
 const Userbar = ({ user: { username } }) => {
   const [bar, setBar] = useState({
     width: "",
@@ -69,11 +79,7 @@ const Userbar = ({ user: { username } }) => {
         <h1 className="userbar__logo">Microblog</h1>
         <h2 className="userbar__hello">Hi, {username}</h2>
         <PostForm />
-        <div className="userbar__actions">
-          <button className="microblog__button userbar__button userbar__action">
-            Find someone
-          </button>
-        </div>
+        <Actions />
         <div className="userbar__resize--bar" onMouseDown={resizeUserBar}></div>
       </div>
       <button
