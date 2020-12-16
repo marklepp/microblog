@@ -1,3 +1,10 @@
+const genId = (function () {
+  let i = 0;
+  return function () {
+    return i++;
+  };
+})();
+
 const moveScroll = (element, initialMousePosition) => {
   let scrollPosition = {
     // The current scroll
@@ -55,4 +62,5 @@ const mouseDrag = (buttonNumber, selector, onMove, afterRelease = () => {}) => (
 module.exports = {
   mouseDrag: mouseDrag,
   moveScroll: { onMove: moveScroll, afterRelease: releaseScroll },
+  genId: genId,
 };

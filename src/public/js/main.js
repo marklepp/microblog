@@ -7,7 +7,7 @@ const BlogContent = require("./components/BlogContent");
 const App = () => {
   return (
     <div className="app">
-      <Userbar username="John Doe" />
+      <Userbar user={{ id: "asdf", username: "John Doe" }} />
       <BlogContent />
     </div>
   );

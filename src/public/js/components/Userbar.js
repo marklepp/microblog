@@ -4,7 +4,7 @@ const { MAX_POST_LENGTH } = require("../constants");
 require("../../css/userbar.css");
 const { mouseDrag } = require("../utils");
 
-const Userbar = ({ username }) => {
+const Userbar = ({ user: { username } }) => {
   const [textvalue, setTextval] = useState("");
   const [bar, setBar] = useState({
     width: "",
@@ -51,8 +51,8 @@ const Userbar = ({ username }) => {
         <h2 className="userbar__hello">Hi, {username}</h2>
         <form className="userbar__form" onSubmit={handleSubmit}>
           <textarea
-            className="userbar__thought"
-            name="thought"
+            className="userbar__post"
+            name="post"
             value={textvalue}
             onChange={handleChange}
             placeholder="What do you think?"
