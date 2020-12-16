@@ -1,5 +1,5 @@
-const { RESET } = require("./actionTypes");
+const actions = require("./actionTypes");
 
 module.exports = {
-  reset: () => ({ type: RESET, payload: {} }),
+  reset: () => ({ type: actions.RESET, payload: {} }),
 };
