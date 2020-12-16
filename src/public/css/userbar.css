@@ -1,15 +1,26 @@
+:root{
+  --userbar-width:100vw;
+}
+
 .userbar {
   position:relative;
-  width: 100%;
+  width: var(--userbar-width);
   height:100vh;
   display:flex;
   flex-direction: column;
   padding:1em;
   background-color:cornflowerblue;
   color:rgb(52, 60, 68);
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
-.userbar__microblog {
+.userbar__logo-with-menuhide {
+  display:flex;
+  flex-direction: row;
+}
+
+.userbar__logo {
   padding-bottom:1em;
 }
 
@@ -66,9 +77,61 @@
 }
 
 
+.userbar__menuhide {
+  position:absolute;
+  width:50px;
+  height:50px;
+  right:1em;
+  top:1em;
+  transition: transform 1s;
+}
+
+.userbar__menuhide-stripes {
+  position: relative;
+  content:"";
+  background-color: white;
+  height: 5px;
+  width: 100%;
+  border-radius: 2.5px;
+}
+
+.userbar__menuhide-stripes::before {
+  all:inherit;
+  content:"";
+  position: absolute;
+  top: -10px;
+}
+.userbar__menuhide-stripes::after {
+  all:inherit;
+  content:"";
+  position: absolute;
+  bottom: -10px;
+}
+
+.userbar--hide {
+  display:none;
+}
+
 @media screen and (min-width: 600px) {
-  .userbar {
-    width: 30%;
+  :root{
+    --userbar-width: 30vw;
+  }
+
+  
+  .userbar__menuhide {
+    position:absolute;
+    width:50px;
+    height:50px;
+    left:1em;
+    top:1em;
+    transition: transform 0.15s;
+  }
+  .userbar__menuhide--follow-bar {
+    transform: translateX(var(--userbar-width)) translateX(-100%) translateX(-2em);
+  }
+
+  .userbar--hide {
+    height: 0px;
   }
   
   .userbar__form {
@@ -82,8 +145,11 @@
 
 
 @media screen and (min-width: 769px) {
-  .userbar {
-    width: 20%;
+  :root{
+    --userbar-width: 25vw;
+  }
+  .userbar__menuhide--follow-bar {
+    transform: translateX(var(--userbar-width)) translateX(-100%) translateX(-2em);
   }
   
   .userbar__form {

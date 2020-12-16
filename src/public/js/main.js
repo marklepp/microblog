@@ -6,10 +6,10 @@ const BlogContent = require("./components/BlogContent");
 
 const App = () => {
   return (
-    <>
+    <div className="app">
       <Userbar username="John Doe" />
       <BlogContent />
-    </>
+    </div>
   );
 };
 

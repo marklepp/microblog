@@ -8,6 +8,13 @@ table {
   table-layout: fixed;
 }
 
+.app {
+  width:100%;
+  height:100vh;
+  display:flex;
+  flex-direction: row;
+}
+
 .microblog__button {
   width: 100%;
   border: none;
