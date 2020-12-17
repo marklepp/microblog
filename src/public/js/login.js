@@ -4,7 +4,7 @@ const ReactDom = require("react-dom");
 const { Provider } = require("react-redux");
 const store = require("./redux/store");
 
-require("../css/login.css");
+require("../css/main.css");
 
 const LoginForm = require("./components/LoginForm");
 

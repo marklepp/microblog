@@ -1,6 +1,8 @@
 const React = require("react");
 const { useState } = React;
 
+require("../../css/login.css");
+
 const LoginForm = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,6 +14,8 @@ const LoginForm = (props) => {
         type="email"
         placeholder="Email"
         value={email}
+        required
+        autoFocus
         onChange={(e) => setEmail(e.target.value)}
       />
       <input
@@ -20,9 +24,14 @@ const LoginForm = (props) => {
         type="password"
         placeholder="Password"
         value={password}
+        required
         onChange={(e) => setPassword(e.target.value)}
       />
-      <input className="loginform__submit" type="submit" value="Login" />
+      <input
+        className="microblog__button loginform__submit"
+        type="submit"
+        value="Login"
+      />
     </form>
   );
 };
