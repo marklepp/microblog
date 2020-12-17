@@ -8,6 +8,7 @@ const LoginForm = (props) => {
   const [password, setPassword] = useState("");
   return (
     <form method="post" action="/login" className="loginform">
+      <h1 className="microblog__logo">Microblog</h1>
       <input
         className="loginform__field loginform__field--email"
         name="email"
@@ -32,6 +33,9 @@ const LoginForm = (props) => {
         type="submit"
         value="Login"
       />
+      <a className="loginform__link" href="/register.html">
+        Not a user? Register
+      </a>
     </form>
   );
 };

@@ -49,13 +49,28 @@ app.get("/", (req, res) => {
   if (sessn.email) {
     res.sendFile(path.join(__dirname, "..", "dist", "restricted.main.html"));
   } else {
-    res.sendFile(path.join(__dirname, "..", "dist", "login.html"));
+    res.redirect("/login");
     //res.sendFile(path.join(__dirname, "..", "login.html"));
   }
 });
 
+["/login", "/register"].forEach((reqpath) => {
+  app.get(reqpath, (req, res) => {
+    if (req.session.email) {
+      res.redirect("/");
+    } else {
+      res.sendFile(path.join(__dirname, "..", "dist", "login.html"));
+    }
+  });
+});
+
 app.post("/login", (req, res, next) => {
   // validate email and password
+  req.session.email = req.body.email;
+  res.redirect("/");
+});
+app.post("/register", (req, res, next) => {
+  // validate email and password, save to db
   req.session.email = req.body.email;
   res.redirect("/");
 });

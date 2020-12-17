@@ -17,6 +17,11 @@ table {
   overflow: hidden;
 }
 
+.microblog__logo {
+  color:rgb(115, 132, 149);
+  padding-bottom:0.25em;
+}
+
 .microblog__button {
   width: 100%;
   border: none;
