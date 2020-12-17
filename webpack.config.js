@@ -1,10 +1,17 @@
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
 module.exports = {
-  entry: path.resolve(__dirname, "src", "public", "js", "main.js"),
+  entry: {
+    main: {
+      import: path.resolve(__dirname, "src", "public", "js", "main.js"),
+      filename: "restricted.[name].bundle.js",
+    },
+    login: path.resolve(__dirname, "src", "public", "js", "login.js"),
+  },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "bundle.js",
+    filename: "[name].bundle.js",
   },
   mode: "development",
   module: {
@@ -28,4 +35,16 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, "src", "views", "index.html"),
+      chunks: ["main"],
+      filename: "restricted.main.html",
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, "src", "views", "index.html"),
+      chunks: ["login"],
+      filename: "login.html",
+    }),
+  ],
 };
