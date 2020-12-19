@@ -12,7 +12,51 @@ const logger = require("morgan");
 //var indexRouter = require("./routes/index");
 //var postsRouter = require("./routes/posts");
 
+const { body, validationResult } = require("express-validator");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
+
 const app = express();
+
+const memorydb = { users: {}, emails: {} };
+
+const newUserId = (function () {
+  let i = 0;
+  return function newUserId() {
+    return i++;
+  };
+})();
+
+function getUser(userId) {
+  if (userId || userId === 0) {
+    return memorydb.users[userId];
+  } else {
+    return undefined;
+  }
+}
+
+function getUserByEmail(email) {
+  const userId = memorydb.emails[email];
+  return getUser(userId);
+}
+
+async function createUser(sanitizedUsername, validatedEmail, password) {
+  const userId = newUserId();
+  memorydb.users[userId] = {
+    username: sanitizedUsername,
+    email: validatedEmail,
+    passwordhash: null,
+  };
+  memorydb.emails[validatedEmail] = userId;
+  await bcrypt.hash(password, saltRounds, function (err, hash) {
+    memorydb.users[userId].passwordhash = hash;
+    console.log(memorydb.users[userId]);
+  });
+
+  return userId;
+}
+
+createUser("asdf", "asdf@asdf.com", "asdf");
 
 // Use logging and set settings - default
 app.use(logger("dev"));
@@ -34,29 +78,26 @@ app.use(
 // app.use("/", indexRouter);
 // app.use("/posts", postsRouter);
 
-var sessn;
 app.use("/restricted*", (req, res, next) => {
-  if (req.session.email) {
+  if (req.session.user) {
     next();
   } else {
     res.redirect("/");
   }
 });
 app.use(express.static(path.join(__dirname, "..", "dist")));
-app.get("/", (req, res) => {
-  sessn = req.session;
 
-  if (sessn.email) {
+app.get("/", (req, res) => {
+  if (req.session.user) {
     res.sendFile(path.join(__dirname, "..", "dist", "restricted.main.html"));
   } else {
     res.redirect("/login");
-    //res.sendFile(path.join(__dirname, "..", "login.html"));
   }
 });
 
 ["/login", "/register"].forEach((reqpath) => {
   app.get(reqpath, (req, res) => {
-    if (req.session.email) {
+    if (req.session.user) {
       res.redirect("/");
     } else {
       res.sendFile(path.join(__dirname, "..", "dist", "login.html"));
@@ -64,25 +105,74 @@ app.get("/", (req, res) => {
   });
 });
 
-app.post("/login", (req, res, next) => {
+app.post(
+  "/login",
   // validate email and password
-  req.session.email = req.body.email;
-  res.redirect("/");
-});
-app.post("/register", (req, res, next) => {
-  // validate email and password, save to db
-  req.session.email = req.body.email;
-  res.redirect("/");
-});
-app.post("/logout", (req, res, next) => {
-  req.session.destroy(function (err) {
-    if (err) {
-      console.log(err);
-    } else {
-      res.redirect("/");
+  body("email").trim().isEmail(),
+  body("password").isLength({ min: 1 }),
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-  });
-});
+
+    const { email, password } = req.body;
+    const user = getUserByEmail(email);
+    if (user) {
+      bcrypt.compare(password, user.passwordhash).then(function (result) {
+        if (result) {
+          req.session.user = user;
+          res.sendStatus(200);
+        } else {
+          res.status(401).json({ password: true });
+        }
+      });
+    } else {
+      res.status(401).json({ email: true });
+    }
+  }
+);
+
+app.post(
+  "/register",
+  body("username").trim().escape().isLength({ min: 1 }),
+  body("email").trim().isEmail(),
+  body("password").isLength({ min: 1 }),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { username, email, password } = req.body;
+
+    const emailFound = Boolean(getUserByEmail(email));
+
+    if (emailFound) {
+      console.log("found");
+      return res.status(409).json({ email: emailFound });
+    }
+
+    createUser(username, email, password).then((userId) => {
+      req.session.user = getUser(userId);
+      res.sendStatus(200);
+    });
+  }
+);
+
+(function () {
+  function destroySession(req, res, next) {
+    req.session.destroy(function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        res.sendStatus(200);
+      }
+    });
+  }
+
+  app.get("/logout", destroySession);
+  app.post("/logout", destroySession);
+})();
 
 /*
 var ssn;
@@ -145,7 +235,8 @@ app.use(function (err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  //res.render("error");
+  res.write("<h1>error: " + err.status + "</h1>");
+  res.end();
 });
 
 module.exports = app;

@@ -32,11 +32,20 @@ const PostForm = (props) => {
   );
 };
 
+const logout = () => {
+  fetch("/logout", {
+    method: "post",
+    body: "",
+    credentials: "same-origin",
+  }).then((res) => window.location.assign("/"));
+};
+
 const Actions = (props) => {
   return (
     <div className="userbar__actions">
-      <button className="microblog__button userbar__button userbar__action">
-        Find someone
+      <button className="microblog__button userbar__button userbar__action">Find someone</button>
+      <button onClick={logout} className="microblog__button userbar__button userbar__action">
+        Logout
       </button>
     </div>
   );
@@ -59,10 +68,7 @@ const Userbar = ({ user: { username } }) => {
       if (newWidth < (bar.initialWidth || initialWidth)) {
         newWidth = bar.initialWidth || initialWidth;
       }
-      document.documentElement.style.setProperty(
-        "--userbar-width",
-        newWidth + "px"
-      );
+      document.documentElement.style.setProperty("--userbar-width", newWidth + "px");
       setBar({
         width: newWidth,
         initialWidth: bar.initialWidth || initialWidth,

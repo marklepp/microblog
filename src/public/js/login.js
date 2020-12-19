@@ -13,13 +13,48 @@ require("../css/main.css");
 
 require("../css/login.css");
 
-const defaultFormValue = (setter) => (e) => setter(e.target.value);
+const defaultFormValue = (setter) => (e) => {
+  e.target.setCustomValidity("");
+  setter(e.target.value);
+};
 
-const LoginForm = (props) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const LoginForm = ({ email, setEmail, password, setPassword }) => {
+  function loginUser(event) {
+    event.preventDefault();
+    fetch("/login", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          return window.location.assign("/");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data) {
+          const form = document.getElementById("loginform");
+          if (data.email) {
+            form.elements["email"].setCustomValidity("Email not found");
+          } else if (data.password) {
+            form.elements["password"].setCustomValidity("Wrong password");
+          } else {
+            if (data.errors) {
+              data.errors.forEach((err) => {
+                form.elements[err.param].setCustomValidity(err.msg);
+              });
+            }
+          }
+        }
+      });
+  }
+
   return (
-    <form method="post" action="/login" className="loginform">
+    <form id="loginform" onSubmit={loginUser} className="loginform">
       <h1 className="microblog__logo">Microblog</h1>
       <input
         className="loginform__field loginform__field--email"
@@ -40,24 +75,50 @@ const LoginForm = (props) => {
         required
         onChange={defaultFormValue(setPassword)}
       />
-      <input
-        className="microblog__button loginform__submit"
-        type="submit"
-        value="Login"
-      />
+      <input className="microblog__button loginform__submit" type="submit" value="Login" />
       <Link className="loginform__link" to="/register">
         Not a user? Register
       </Link>
     </form>
   );
 };
-const RegisterForm = (props) => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
+const RegisterForm = ({ username, setUsername, email, setEmail, password, setPassword }) => {
+  function registerUser(event) {
+    event.preventDefault();
+    fetch("/register", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, email, password }),
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          return window.location.assign("/");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data) {
+          const form = document.getElementById("registerform");
+          if (data.email) {
+            form.elements["email"].setCustomValidity("Email already in use");
+          } else {
+            if (data.errors) {
+              data.errors.forEach((err) => {
+                form.elements[err.param].setCustomValidity(err.msg);
+              });
+            }
+          }
+        }
+      });
+  }
+
   const [password2, setPassword2] = useState("");
   return (
-    <form method="post" action="/register" className="loginform">
+    <form id="registerform" onSubmit={registerUser} className="loginform">
       <h1 className="microblog__logo">Microblog</h1>
       <input
         className="loginform__field"
@@ -89,7 +150,6 @@ const RegisterForm = (props) => {
       />
       <input
         className="loginform__field"
-        name="password2"
         type="password"
         placeholder="Confirm password"
         value={password2}
@@ -103,11 +163,7 @@ const RegisterForm = (props) => {
           setPassword2(e.target.value);
         }}
       />
-      <input
-        className="microblog__button loginform__submit"
-        type="submit"
-        value="Register"
-      />
+      <input className="microblog__button loginform__submit" type="submit" value="Register" />
       <Link className="loginform__link" to="/login">
         Already a user? Login
       </Link>
@@ -116,18 +172,22 @@ const RegisterForm = (props) => {
 };
 
 const App = () => {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const loginstate = { username, setUsername, email, setEmail, password, setPassword };
   return (
     <Router>
       <div className="app">
         <Switch>
           <Route path="/login">
-            <LoginForm />
+            <LoginForm {...loginstate} />
           </Route>
           <Route path="/register">
-            <RegisterForm />
+            <RegisterForm {...loginstate} />
           </Route>
           <Route path="/">
-            <LoginForm />
+            <LoginForm {...loginstate} />
           </Route>
         </Switch>
       </div>
