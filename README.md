@@ -4,6 +4,8 @@ Microblogging site for Web Applications-course
 
 ## Installing
 
+Requires npm package manager.
+
 ```
 git clone https://github.com/marklepp/microblog.git
 cd microblog
@@ -26,3 +28,5 @@ run command:
 npm run build
 npm run start
 ```
+
+Site will open by default to localhost:8080
