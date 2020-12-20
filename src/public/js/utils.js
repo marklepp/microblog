@@ -5,6 +5,12 @@ const genId = (function () {
   };
 })();
 
+const defaultFormValue = (setter, messageSetter = () => {}) => (e) => {
+  e.target.setCustomValidity("");
+  messageSetter("");
+  setter(e.target.value);
+};
+
 const moveScroll = (element, initialMousePosition) => {
   let scrollPosition = {
     // The current scroll
@@ -34,9 +40,7 @@ const mouseUpHandler = (element, moveHandler, afterRelease) => (event) => {
   afterRelease(event, element);
 };
 
-const mouseDrag = (buttonNumber, selector, onMove, afterRelease = () => {}) => (
-  event
-) => {
+const mouseDrag = (buttonNumber, selector, onMove, afterRelease = () => {}) => (event) => {
   if (event.button === buttonNumber) {
     const initialMousePosition = {
       // Get the current mouse position
@@ -63,4 +67,5 @@ module.exports = {
   mouseDrag: mouseDrag,
   moveScroll: { onMove: moveScroll, afterRelease: releaseScroll },
   genId: genId,
+  defaultFormValue,
 };

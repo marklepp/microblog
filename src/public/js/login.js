@@ -3,18 +3,13 @@ const { useState } = React;
 const { BrowserRouter, Switch, Route, Link } = require("react-router-dom");
 const Router = BrowserRouter;
 const ReactDom = require("react-dom");
+const { defaultFormValue } = require("./utils");
 
 require("../css/main.css");
 
 //const LoginForm = require("./components/LoginForm");
 
 require("../css/login.css");
-
-const defaultFormValue = (messageSetter, setter) => (e) => {
-  e.target.setCustomValidity("");
-  messageSetter("");
-  setter(e.target.value);
-};
 
 const LoginForm = ({ email, setEmail, password, setPassword }) => {
   const [message, setMessage] = useState("");
@@ -66,7 +61,7 @@ const LoginForm = ({ email, setEmail, password, setPassword }) => {
         value={email}
         required
         autoFocus
-        onChange={defaultFormValue(setMessage, setEmail)}
+        onChange={defaultFormValue(setEmail, setMessage)}
       />
       <input
         className="loginform__field loginform__field--password"
@@ -75,7 +70,7 @@ const LoginForm = ({ email, setEmail, password, setPassword }) => {
         placeholder="Password"
         value={password}
         required
-        onChange={defaultFormValue(setMessage, setPassword)}
+        onChange={defaultFormValue(setPassword, setMessage)}
       />
       {message ? <p className="loginform__message">{message}</p> : <></>}
       <input className="microblog__button loginform__submit" type="submit" value="Login" />
@@ -134,7 +129,7 @@ const RegisterForm = ({ username, setUsername, email, setEmail, password, setPas
         value={username}
         required
         autoFocus
-        onChange={defaultFormValue(setMessage, setUsername)}
+        onChange={defaultFormValue(setUsername, setMessage)}
       />
       <input
         className="loginform__field"
@@ -143,7 +138,7 @@ const RegisterForm = ({ username, setUsername, email, setEmail, password, setPas
         placeholder="Email"
         value={email}
         required
-        onChange={defaultFormValue(setMessage, setEmail)}
+        onChange={defaultFormValue(setEmail, setMessage)}
       />
       <input
         className="loginform__field"
@@ -152,7 +147,7 @@ const RegisterForm = ({ username, setUsername, email, setEmail, password, setPas
         placeholder="Password"
         value={password}
         required
-        onChange={defaultFormValue(setMessage, setPassword)}
+        onChange={defaultFormValue(setPassword, setMessage)}
       />
       <input
         className="loginform__field"

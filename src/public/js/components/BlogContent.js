@@ -1,12 +1,9 @@
 const React = require("react");
 const { useState } = React;
 require("../../css/blogcontent.css");
+const { MAX_POST_LENGTH } = require("../constants");
 
-const defaultFormValue = (messageSetter, setter) => (e) => {
-  e.target.setCustomValidity("");
-  messageSetter("");
-  setter(e.target.value);
-};
+const { defaultFormValue } = require("../utils");
 
 const updatePost = function (post, posts, setPosts) {
   fetch("/post/id", {
@@ -67,7 +64,7 @@ const BlogComments = ({ comments, post, posts, setPosts }) => {
           type="text"
           name="content"
           value={comment}
-          onChange={defaultFormValue(() => {}, setComment)}
+          onChange={defaultFormValue((value) => setComment(value.slice(0, MAX_POST_LENGTH)))}
           placeholder="Comment"
         />
         <input
