@@ -33,6 +33,10 @@ module.exports = {
         exclude: /node_modules/,
         use: ["style-loader", "css-loader"],
       },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: "asset/resource",
+      },
     ],
   },
   plugins: [
@@ -40,11 +44,13 @@ module.exports = {
       template: path.join(__dirname, "src", "views", "index.html"),
       chunks: ["main"],
       filename: "restricted.main.html",
+      favicon: path.join(__dirname, "src", "public", "img", "fav.png"),
     }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "src", "views", "index.html"),
       chunks: ["login"],
       filename: "login.html",
+      favicon: path.join(__dirname, "src", "public", "img", "fav.png"),
     }),
   ],
 };
