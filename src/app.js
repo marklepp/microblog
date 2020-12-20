@@ -16,9 +16,6 @@ const { MAX_POST_LENGTH } = require(path.join(__dirname, "public", "js", "consta
 
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
-const { memo } = require("react");
-const { getHeapCodeStatistics } = require("v8");
-const { maxHeaderSize } = require("http");
 const saltRounds = 10;
 
 const app = express();
@@ -95,6 +92,9 @@ function getComments(postId) {
 function getFullComments(postId) {
   return getComments(postId).map((com) => ({ ...com, user: getUser(com.userId) }));
 }
+function getFullComment(comment) {
+  return { ...comment, user: getUser(comment.userId) };
+}
 
 function addCommentToPost(commenterId, sanitizedContent, postId) {
   const commentId = newCommentId();
@@ -102,9 +102,10 @@ function addCommentToPost(commenterId, sanitizedContent, postId) {
     id: commentId,
     content: sanitizedContent,
     userId: commenterId,
+    postId: postId,
     created: Date.now(),
   };
-  memorydb.posts[postId].push(commentId);
+  memorydb.posts[postId].comments.push(commentId);
   return commentId;
 }
 
@@ -125,12 +126,35 @@ function getPosts(from, to, descending) {
   }));
   return posts;
 }
+
 function getPostsSince(creationTime) {
   return memorydb.posts
     .filter((post) => post.created > creationTime)
     .map((post) => getFullPost(post.id));
 }
 
+function partitionByPostId(comments) {
+  var obj = {};
+  comments.forEach((comment) => {
+    if (!obj[comment.postId]) {
+      obj[comment.postId] = [];
+    }
+    obj[comment.postId].push(comment);
+  });
+  return obj;
+}
+
+function getCommentsSince(postIds, creationTime) {
+  return partitionByPostId(
+    memorydb.comments
+      .filter((comment) => comment.created > creationTime && postIds.includes(comment.postId))
+      .map(getFullComment)
+  );
+}
+
+createUser("Microblog-team", "team@microblog.com", "microblog-team").then((userId) => {
+  createPost(userId, "Hello!");
+});
 createUser("asdf", "asdf@asdf.com", "asdf");
 
 // Use logging and set settings - default
@@ -310,11 +334,39 @@ app.post("/newposts", mustBeLoggedIn, (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { firstId, lastId } = req.body;
-  const first = getPost(firstId);
-  const last = getPost(lastId);
-  res.json({ posts: getPostsSince(Math.max(first.created, last.created)) });
+  const { postIds } = req.body;
+  const firstId = postIds[0];
+  const lastId = postIds[postIds.length - 1];
+  //  const { firstId, lastId } = req.body;
+  const posts = postIds.map(getPost);
+  const lastPost = Math.max(...posts.map((p) => p.created));
+  res.json({ newPosts: getPostsSince(lastPost), posts: postIds.map(getFullPost) });
 });
+
+app.post("/post/id", mustBeLoggedIn, body("postId").isInt(), (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const { postId } = req.body;
+  res.json(getFullPost(postId));
+});
+
+app.post(
+  "/comment",
+  mustBeLoggedIn,
+  body("content").escape().isLength({ min: 1 }),
+  body("postId").isInt(),
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { postId, content } = req.body;
+    addCommentToPost(req.session.user.id, content, postId);
+    res.sendStatus(200);
+  }
+);
 
 /*
 var ssn;
