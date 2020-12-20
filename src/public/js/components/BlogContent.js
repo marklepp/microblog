@@ -1,9 +1,10 @@
+const { useEffect, useRef } = require("react");
 const React = require("react");
 const { useState } = React;
 require("../../css/blogcontent.css");
 const { MAX_POST_LENGTH } = require("../constants");
 
-const { defaultFormValue } = require("../utils");
+const { defaultFormValue, resizeTextareaToFitContent } = require("../utils");
 
 const updatePost = function (post, posts, setPosts) {
   fetch("/post/id", {
@@ -47,6 +48,15 @@ const BlogComments = ({ comments, post, posts, setPosts }) => {
     }
   }
 
+  const txtarea = useRef(null);
+
+  useEffect(
+    function () {
+      resizeTextareaToFitContent(txtarea.current);
+    },
+    [comment]
+  );
+
   return (
     <div className="blogcontent__comments">
       {comments.map(({ id, user: { username }, content }) => (
@@ -58,15 +68,17 @@ const BlogComments = ({ comments, post, posts, setPosts }) => {
           <p className="blogcontent__comment-username">{username}</p>
         </div>
       ))}
-      <form onSubmit={postComment} className="blogcontent__commentform">
-        <input
+      <form onSubmit={postComment} autocomplete="off" className="blogcontent__commentform">
+        <textarea
+          ref={txtarea}
           className="blogcontent__commentinput"
           type="text"
           name="content"
           value={comment}
+          rows="1"
           onChange={defaultFormValue((value) => setComment(value.slice(0, MAX_POST_LENGTH)))}
           placeholder="Comment"
-        />
+        ></textarea>
         <input
           type="submit"
           value="Comment"

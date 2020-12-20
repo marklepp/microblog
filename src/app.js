@@ -324,6 +324,7 @@ app.post(
 
     let { userId, content } = req.body;
     content = content.slice(0, MAX_POST_LENGTH);
+    content = content.replace(/\n/g, "<br />");
     createPost(userId, content).then((postId) => res.json(getFullPost(postId)));
   }
 );
@@ -335,9 +336,6 @@ app.post("/newposts", mustBeLoggedIn, (req, res) => {
   }
 
   const { postIds } = req.body;
-  const firstId = postIds[0];
-  const lastId = postIds[postIds.length - 1];
-  //  const { firstId, lastId } = req.body;
   const posts = postIds.map(getPost);
   const lastPost = Math.max(...posts.map((p) => p.created));
   res.json({ newPosts: getPostsSince(lastPost), posts: postIds.map(getFullPost) });
@@ -362,7 +360,9 @@ app.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { postId, content } = req.body;
+    let { postId, content } = req.body;
+    content = content.slice(0, MAX_POST_LENGTH);
+    content = content.replace(/\n/g, "<br />");
     addCommentToPost(req.session.user.id, content, postId);
     res.sendStatus(200);
   }

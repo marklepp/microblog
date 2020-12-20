@@ -11,6 +11,13 @@ const defaultFormValue = (setter, messageSetter = () => {}) => (e) => {
   setter(e.target.value);
 };
 
+function resizeTextareaToFitContent(element) {
+  const scrolltop = element.scrolltop;
+  element.style.height = "";
+  element.style.height = element.scrollHeight + "px";
+  element.scrolltop = scrolltop;
+}
+
 const moveScroll = (element, initialMousePosition) => {
   let scrollPosition = {
     // The current scroll
@@ -68,4 +75,5 @@ module.exports = {
   moveScroll: { onMove: moveScroll, afterRelease: releaseScroll },
   genId: genId,
   defaultFormValue,
+  resizeTextareaToFitContent,
 };

@@ -19,11 +19,14 @@
   padding:0.5em;
   border-radius: 0.25em;
   background-color: cornflowerblue;
+  min-width: 270px;
 }
 
 .blogcontent__post-text {
   font-size: 1.25em;
   padding:0.5em;
+  
+  word-wrap: break-word;
 }
 
 .blogcontent__post-username {
@@ -62,6 +65,9 @@
 }
 
 .blogcontent__commentinput {
+  box-sizing: border-box;
+  min-height: 2em;
+  max-height: 100vh;
   width:60%;
   flex-grow: 2;
   padding: 0.25em;

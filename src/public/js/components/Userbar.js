@@ -63,7 +63,6 @@ const logout = () => {
 const Actions = (props) => {
   return (
     <div className="userbar__actions">
-      <button className="microblog__button userbar__button userbar__action">Find someone</button>
       <button onClick={logout} className="microblog__button userbar__button userbar__action">
         Logout
       </button>
