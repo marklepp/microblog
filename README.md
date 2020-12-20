@@ -20,14 +20,10 @@ on windows powershell run command:
 
 ```powershell .\devserver.ps1```
 
-on linux, bash:
+on linux, bash (webpack needs to be restarted if webpack.config.js is modified):
 
 ```
-npm run webpack:watch &
-P1=$!
-npm run server:watch &
-P2=$!
-wait $P1 $P2
+npm run webpack:watch & npm run server:watch
 ```
 
 ## Running production mode
