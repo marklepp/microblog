@@ -14,13 +14,25 @@ npm install
 
 ## Running development server
 
-Set webpack.config.js mode to ```mode: "development",```
+Set webpack.config.js mode to ```mode: "development"```
+
 on windows powershell run command:
+
 ```powershell .\devserver.ps1```
+
+on linux, bash:
+
+```
+npm run webpack:watch &
+P1=$!
+npm run server:watch &
+P2=$!
+wait $P1 $P2
+```
 
 ## Running production mode
 
-Set webpack.config.js mode to ```mode: "production",```
+Set webpack.config.js mode to ```mode: "production"```
 
 run command:
 
