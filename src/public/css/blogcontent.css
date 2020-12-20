@@ -55,3 +55,30 @@
   font-size: 0.8em;
   opacity: 50%;
 }
+
+.blogcontent__commentform {
+  display: flex;
+  flex-direction: row;
+}
+
+.blogcontent__commentinput {
+  width:60%;
+  flex-grow: 2;
+  padding: 0.25em;
+  border-radius: 0px;
+  border: none;
+  resize: none;
+  border-top-left-radius: 0.5em;
+  border-bottom-left-radius: 0.5em;
+  background-color: rgb(180, 198, 230);
+}
+
+.blogcontent__commentsubmit {
+  width:30%;
+  max-width: 300px;
+  color:snow;
+  background-color: rgb(48, 111, 228);
+  border-radius: 0px;
+  border-top-right-radius: 0.5em;
+  border-bottom-right-radius: 0.5em;
+}

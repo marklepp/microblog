@@ -119,7 +119,17 @@ const getTestPosts = () => {
   ];
 };
 
+const defaultFormValue = (messageSetter, setter) => (e) => {
+  e.target.setCustomValidity("");
+  messageSetter("");
+  setter(e.target.value);
+};
+
 const BlogComments = ({ comments }) => {
+  const [comment, setComment] = useState("");
+  function postComment(event) {
+    event.preventDefault();
+  }
   return (
     <div className="blogcontent__comments">
       {comments.map(({ id, user: { username }, content }) => (
@@ -131,6 +141,21 @@ const BlogComments = ({ comments }) => {
           <p className="blogcontent__comment-username">{username}</p>
         </div>
       ))}
+      <form onSubmit={postComment} className="blogcontent__commentform">
+        <input
+          className="blogcontent__commentinput userbar__post"
+          type="text"
+          name="content"
+          value={comment}
+          onChange={defaultFormValue(() => {}, setComment)}
+          placeholder="Comment"
+        />
+        <input
+          type="submit"
+          value="Comment"
+          className="microblog__button userbar__button userbar__button--publish blogcontent__commentsubmit"
+        />
+      </form>
     </div>
   );
 };
