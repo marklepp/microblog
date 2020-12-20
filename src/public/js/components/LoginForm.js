@@ -1,13 +1,50 @@
 const React = require("react");
 const { useState } = React;
+const { Link } = require("react-router-dom");
+const { defaultFormValue } = require("../utils");
 
-require("../../css/login.css");
+const LoginForm = ({ email, setEmail, password, setPassword }) => {
+  const [message, setMessage] = useState("");
 
-const LoginForm = (props) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  function loginUser(event) {
+    event.preventDefault();
+    fetch("/login", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          return window.location.assign("/");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data) {
+          const form = document.getElementById("loginform");
+          if (data.email) {
+            form.elements["email"].setCustomValidity("Email not found");
+            setMessage("Email not found");
+          } else if (data.password) {
+            form.elements["password"].setCustomValidity("Wrong password");
+            setMessage("Wrong password");
+          } else {
+            if (data.errors) {
+              data.errors.forEach((err) => {
+                form.elements[err.param].setCustomValidity(err.msg);
+              });
+              setMessage("Check your inputs");
+            }
+          }
+        }
+      });
+  }
+
   return (
-    <form method="post" action="/login" className="loginform">
+    <form id="loginform" onSubmit={loginUser} className="loginform">
       <h1 className="microblog__logo">Microblog</h1>
       <input
         className="loginform__field loginform__field--email"
@@ -17,7 +54,7 @@ const LoginForm = (props) => {
         value={email}
         required
         autoFocus
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={defaultFormValue(setEmail, setMessage)}
       />
       <input
         className="loginform__field loginform__field--password"
@@ -26,16 +63,13 @@ const LoginForm = (props) => {
         placeholder="Password"
         value={password}
         required
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={defaultFormValue(setPassword, setMessage)}
       />
-      <input
-        className="microblog__button loginform__submit"
-        type="submit"
-        value="Login"
-      />
-      <a className="loginform__link" href="/register.html">
+      {message ? <p className="loginform__message">{message}</p> : <></>}
+      <input className="microblog__button loginform__submit" type="submit" value="Login" />
+      <Link className="loginform__link" to="/register">
         Not a user? Register
-      </a>
+      </Link>
     </form>
   );
 };

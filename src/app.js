@@ -310,7 +310,7 @@ app.get("/user", mustBeLoggedIn, (req, res) => {
 app.post(
   "/post",
   mustBeLoggedIn,
-  body("content").escape().isLength({ min: 1 }),
+  body("content").escape().trim().isLength({ min: 1 }),
   body("userId"),
   (req, res) => {
     const errors = validationResult(req);
@@ -348,7 +348,7 @@ app.post("/post/id", mustBeLoggedIn, body("postId").isInt(), (req, res) => {
 app.post(
   "/comment",
   mustBeLoggedIn,
-  body("content").escape().isLength({ min: 1 }),
+  body("content").escape().trim().isLength({ min: 1 }),
   body("postId").isInt(),
   (req, res) => {
     const errors = validationResult(req);

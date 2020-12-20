@@ -70,10 +70,33 @@ const mouseDrag = (buttonNumber, selector, onMove, afterRelease = () => {}) => (
   }
 };
 
+const throttle = (limit, func) => {
+  let inThrottle;
+  return function (...args) {
+    const context = this;
+    if (!inThrottle) {
+      func.apply(context, args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+};
+
+const debounce = (delay, func) => {
+  let inDebounce;
+  return function (...args) {
+    const context = this;
+    clearTimeout(inDebounce);
+    inDebounce = setTimeout(() => func.apply(context, args), delay);
+  };
+};
+
 module.exports = {
   mouseDrag: mouseDrag,
   moveScroll: { onMove: moveScroll, afterRelease: releaseScroll },
   genId: genId,
   defaultFormValue,
   resizeTextareaToFitContent,
+  throttle,
+  debounce,
 };

@@ -7,28 +7,9 @@ require("../css/main.css");
 const Userbar = require("./components/Userbar");
 const BlogContent = require("./components/BlogContent");
 
-const throttle = (limit, func) => {
-  let inThrottle;
-  return function (...args) {
-    const context = this;
-    if (!inThrottle) {
-      func.apply(context, args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
-  };
-};
+const { debounce } = require("./utils");
 
-const debounce = (delay, func) => {
-  let inDebounce;
-  return function (...args) {
-    const context = this;
-    clearTimeout(inDebounce);
-    inDebounce = setTimeout(() => func.apply(context, args), delay);
-  };
-};
-
-const getUser = debounce(50, function getUser(user, setUser) {
+const getSessionUser = debounce(50, function getSessionUser(user, setUser) {
   if (user === null) {
     fetch("/user", {
       method: "GET",
@@ -39,7 +20,7 @@ const getUser = debounce(50, function getUser(user, setUser) {
   }
 });
 
-const getPosts = (function () {
+const getPostsBetween = (function () {
   let values = new WeakSet();
   return function getPosts(limits, setPosts) {
     if (!values.has(limits)) {
@@ -102,12 +83,12 @@ const getNewPosts = function (posts, setPosts) {
 
 const App = () => {
   const [user, setUser] = useState(null);
-  getUser(user, setUser);
+  getSessionUser(user, setUser);
 
   const [postLimits, setLimits] = useState({ from: 0, to: 50 });
   const [posts, setPosts] = useState([]);
 
-  getPosts(postLimits, setPosts);
+  getPostsBetween(postLimits, setPosts);
 
   clearTimeout(postPoll);
   postPoll = setTimeout(() => getNewPosts(posts, setPosts), 2000);
