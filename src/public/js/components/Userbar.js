@@ -26,7 +26,7 @@ const PostForm = ({ user: { id }, posts, setPosts }) => {
           res.json().then((newPost) => {
             const newPosts = [newPost, ...posts];
             setPosts(newPosts);
-            setTextval("");
+            //setTextval("");
           });
         }
       });

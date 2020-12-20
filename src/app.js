@@ -68,6 +68,7 @@ async function createPost(postUserId, sanitizedContent) {
     content: sanitizedContent,
     comments: [],
     created: Date.now(),
+    lastModification: Date.now(),
   };
   return postId;
 }
@@ -91,14 +92,16 @@ function getFullComment(comment) {
 
 function addCommentToPost(commenterId, sanitizedContent, postId) {
   const commentId = newCommentId();
+  const creationTime = Date.now();
   memorydb.comments[commentId] = {
     id: commentId,
     content: sanitizedContent,
     userId: commenterId,
     postId: postId,
-    created: Date.now(),
+    created: creationTime,
   };
   memorydb.posts[postId].comments.push(commentId);
+  memorydb.posts[postId].lastModification = creationTime;
   return commentId;
 }
 
@@ -120,10 +123,14 @@ function getPosts(from, to, descending) {
   return posts;
 }
 
-function getPostsSince(creationTime) {
+function getPostsSince(modificationTime) {
   return memorydb.posts
-    .filter((post) => post.created > creationTime)
-    .map((post) => getFullPost(post.id));
+    .filter((post) => post.lastModification > modificationTime)
+    .map((post) => getFullPost(post.id))
+    .reduce((obj, post) => {
+      obj[post.id] = post;
+      return obj;
+    }, {});
 }
 
 function partitionByPostId(comments) {
@@ -285,6 +292,7 @@ app.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
+    req.session.lastRequest = Date.now();
     const { from, to, descending } = req.body;
     const posts = getPosts(from, to, descending);
     res.json({ posts });
@@ -322,11 +330,10 @@ app.post("/newposts", mustBeLoggedIn, (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
+  const lastRequest = req.session.lastRequest || Date.now();
+  req.session.lastRequest = Date.now();
 
-  const { postIds } = req.body;
-  const posts = postIds.map(getPost);
-  const lastPost = Math.max(...posts.map((p) => p.created));
-  res.json({ newPosts: getPostsSince(lastPost), posts: postIds.map(getFullPost) });
+  res.json({ newPosts: getPostsSince(lastRequest) });
 });
 
 app.post("/post/id", mustBeLoggedIn, body("postId").isInt(), (req, res) => {

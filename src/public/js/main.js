@@ -69,27 +69,35 @@ const getNewPosts = function (posts, setPosts) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ postIds: posts.map((p) => p.id) }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        //let newPosts = data.posts.concat(...posts);
-        // if (data.comments.length > 0) {
-        //   newPosts = newPosts.map((post) => {
-        //     if (data.comments[post.id]) {
-        //       post.comments = post.comments.concat(
-        //         data.comments[post.id].filter(
-        //           (comment) => !post.comments.find((old) => old.id === comment.id)
-        //         )
-        //       );
-        //     }
-        //     return post;
-        //   });
-        // }
-        setPosts(data.newPosts.concat(data.posts));
-      });
+      body: "", //JSON.stringify({ postIds: posts.map((p) => p.id) }),
+    }).then((res) => {
+      if (res.status === 200) {
+        res.json().then((data) => {
+          if (data) {
+            let hasData = false;
+            for (let i in data.newPosts) {
+              hasData = true;
+              break;
+            }
+
+            if (hasData) {
+              let newPosts = [];
+              posts.forEach((post) => {
+                if (data.newPosts.hasOwnProperty(post.id)) {
+                  newPosts.push(data.newPosts[post.id]);
+                  delete data.newPosts[post.id];
+                } else {
+                  newPosts.push(post);
+                }
+              });
+              setPosts(Object.values(data.newPosts).concat(newPosts));
+            }
+          }
+        });
+      }
+    });
   }
-  postPoll = setTimeout(() => getNewPosts(posts, setPosts), 5000);
+  postPoll = setTimeout(() => getNewPosts(posts, setPosts), 2000);
 };
 
 const App = () => {
@@ -102,7 +110,7 @@ const App = () => {
   getPosts(postLimits, setPosts);
 
   clearTimeout(postPoll);
-  postPoll = setTimeout(() => getNewPosts(posts, setPosts), 5000);
+  postPoll = setTimeout(() => getNewPosts(posts, setPosts), 2000);
   return (
     <div className="app">
       {user ? <Userbar {...{ user, posts, setPosts }} /> : <div></div>}

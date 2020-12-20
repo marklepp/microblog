@@ -68,7 +68,7 @@ const BlogComments = ({ comments, post, posts, setPosts }) => {
           <p className="blogcontent__comment-username">{username}</p>
         </div>
       ))}
-      <form onSubmit={postComment} autocomplete="off" className="blogcontent__commentform">
+      <form onSubmit={postComment} autoComplete="off" className="blogcontent__commentform">
         <textarea
           ref={txtarea}
           className="blogcontent__commentinput"
