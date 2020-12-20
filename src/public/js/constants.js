@@ -1,3 +1,3 @@
 module.exports = {
-  MAX_POST_LENGTH: 148,
+  MAX_POST_LENGTH: 500,
 };

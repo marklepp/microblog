@@ -12,20 +12,30 @@ const logger = require("morgan");
 //var indexRouter = require("./routes/index");
 //var postsRouter = require("./routes/posts");
 
+const { MAX_POST_LENGTH } = require(path.join(__dirname, "public", "js", "constants"));
+
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
+const { memo } = require("react");
+const { getHeapCodeStatistics } = require("v8");
+const { maxHeaderSize } = require("http");
 const saltRounds = 10;
 
 const app = express();
 
-const memorydb = { users: {}, emails: {} };
+const passworddb = { users: [] };
+const memorydb = { users: [], emailToUserId: {}, posts: [], comments: [] };
 
-const newUserId = (function () {
+const idGenerator = function () {
   let i = 0;
-  return function newUserId() {
+  return function newId() {
     return i++;
   };
-})();
+};
+
+const newUserId = idGenerator();
+const newPostId = idGenerator();
+const newCommentId = idGenerator();
 
 function getUser(userId) {
   if (userId || userId === 0) {
@@ -36,24 +46,89 @@ function getUser(userId) {
 }
 
 function getUserByEmail(email) {
-  const userId = memorydb.emails[email];
+  const userId = memorydb.emailToUserId[email];
   return getUser(userId);
 }
 
 async function createUser(sanitizedUsername, validatedEmail, password) {
   const userId = newUserId();
   memorydb.users[userId] = {
+    id: userId,
     username: sanitizedUsername,
     email: validatedEmail,
+    created: Date.now(),
+  };
+  passworddb.users[userId] = {
     passwordhash: null,
   };
-  memorydb.emails[validatedEmail] = userId;
+  memorydb.emailToUserId[validatedEmail] = userId;
   await bcrypt.hash(password, saltRounds, function (err, hash) {
-    memorydb.users[userId].passwordhash = hash;
+    passworddb.users[userId].passwordhash = hash;
     console.log(memorydb.users[userId]);
   });
 
   return userId;
+}
+
+async function createPost(postUserId, sanitizedContent) {
+  const postId = newPostId();
+  memorydb.posts[postId] = {
+    id: postId,
+    userId: postUserId,
+    content: sanitizedContent,
+    comments: [],
+    created: Date.now(),
+  };
+  return postId;
+}
+
+function getPost(postId) {
+  return memorydb.posts[postId];
+}
+function getFullPost(postId) {
+  let post = getPost(postId);
+  return { ...post, user: getUser(post.userId), comments: getFullComments(postId) };
+}
+function getComments(postId) {
+  return memorydb.posts[postId].comments.map((id) => memorydb.comments[id]);
+}
+function getFullComments(postId) {
+  return getComments(postId).map((com) => ({ ...com, user: getUser(com.userId) }));
+}
+
+function addCommentToPost(commenterId, sanitizedContent, postId) {
+  const commentId = newCommentId();
+  memorydb.comments[commentId] = {
+    id: commentId,
+    content: sanitizedContent,
+    userId: commenterId,
+    created: Date.now(),
+  };
+  memorydb.posts[postId].push(commentId);
+  return commentId;
+}
+
+function getPosts(from, to, descending) {
+  let posts = [];
+  if (descending) {
+    const len = memorydb.posts.length;
+    posts = memorydb.posts.slice(len - to, len - from);
+    posts.reverse();
+  } else {
+    posts = memorydb.posts.slice(from, to);
+  }
+  posts = posts.map((post) => ({
+    id: post.id,
+    user: getUser(post.userId),
+    comments: getFullComments(post.id),
+    content: post.content,
+  }));
+  return posts;
+}
+function getPostsSince(creationTime) {
+  return memorydb.posts
+    .filter((post) => post.created > creationTime)
+    .map((post) => getFullPost(post.id));
 }
 
 createUser("asdf", "asdf@asdf.com", "asdf");
@@ -78,13 +153,23 @@ app.use(
 // app.use("/", indexRouter);
 // app.use("/posts", postsRouter);
 
-app.use("/restricted*", (req, res, next) => {
+function mustBeLoggedIn(req, res, next) {
   if (req.session.user) {
     next();
   } else {
     res.redirect("/");
   }
-});
+}
+
+function mustBeLoggedOut(req, res, next) {
+  if (req.session.user) {
+    res.redirect("/");
+  } else {
+    next();
+  }
+}
+
+app.use("/restricted*", mustBeLoggedIn);
 app.use(express.static(path.join(__dirname, "..", "dist")));
 
 app.get("/", (req, res) => {
@@ -107,6 +192,7 @@ app.get("/", (req, res) => {
 
 app.post(
   "/login",
+  mustBeLoggedOut,
   // validate email and password
   body("email").trim().isEmail(),
   body("password").isLength({ min: 1 }),
@@ -119,7 +205,7 @@ app.post(
     const { email, password } = req.body;
     const user = getUserByEmail(email);
     if (user) {
-      bcrypt.compare(password, user.passwordhash).then(function (result) {
+      bcrypt.compare(password, passworddb.users[user.id].passwordhash).then(function (result) {
         if (result) {
           req.session.user = user;
           res.sendStatus(200);
@@ -135,6 +221,7 @@ app.post(
 
 app.post(
   "/register",
+  mustBeLoggedOut,
   body("username").trim().escape().isLength({ min: 1 }),
   body("email").trim().isEmail(),
   body("password").isLength({ min: 1 }),
@@ -173,6 +260,61 @@ app.post(
   app.get("/logout", destroySession);
   app.post("/logout", destroySession);
 })();
+
+app.post(
+  "/posts",
+  mustBeLoggedIn,
+  body("from").isInt(),
+  body("to").isInt(),
+  body("descending").isBoolean(),
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { from, to, descending } = req.body;
+    const posts = getPosts(from, to, descending);
+    res.json({ posts });
+  }
+);
+
+app.get("/user", mustBeLoggedIn, (req, res) => {
+  if (req.session.user) {
+    res.json({ user: req.session.user });
+  } else {
+    res.json(null);
+  }
+});
+
+app.post(
+  "/post",
+  mustBeLoggedIn,
+  body("content").escape().isLength({ min: 1 }),
+  body("userId"),
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    let { userId, content } = req.body;
+    content = content.slice(0, MAX_POST_LENGTH);
+    createPost(userId, content).then((postId) => res.json(getFullPost(postId)));
+  }
+);
+
+app.post("/newposts", mustBeLoggedIn, (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { firstId, lastId } = req.body;
+  const first = getPost(firstId);
+  const last = getPost(lastId);
+  res.json({ posts: getPostsSince(Math.max(first.created, last.created)) });
+});
 
 /*
 var ssn;

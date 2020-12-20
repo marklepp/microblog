@@ -13,12 +13,14 @@ require("../css/main.css");
 
 require("../css/login.css");
 
-const defaultFormValue = (setter) => (e) => {
+const defaultFormValue = (messageSetter, setter) => (e) => {
   e.target.setCustomValidity("");
+  messageSetter("");
   setter(e.target.value);
 };
 
 const LoginForm = ({ email, setEmail, password, setPassword }) => {
+  const [message, setMessage] = useState("");
   function loginUser(event) {
     event.preventDefault();
     fetch("/login", {
@@ -40,13 +42,16 @@ const LoginForm = ({ email, setEmail, password, setPassword }) => {
           const form = document.getElementById("loginform");
           if (data.email) {
             form.elements["email"].setCustomValidity("Email not found");
+            setMessage("Email not found");
           } else if (data.password) {
             form.elements["password"].setCustomValidity("Wrong password");
+            setMessage("Wrong password");
           } else {
             if (data.errors) {
               data.errors.forEach((err) => {
                 form.elements[err.param].setCustomValidity(err.msg);
               });
+              setMessage("Check your inputs");
             }
           }
         }
@@ -64,7 +69,7 @@ const LoginForm = ({ email, setEmail, password, setPassword }) => {
         value={email}
         required
         autoFocus
-        onChange={defaultFormValue(setEmail)}
+        onChange={defaultFormValue(setMessage, setEmail)}
       />
       <input
         className="loginform__field loginform__field--password"
@@ -73,8 +78,9 @@ const LoginForm = ({ email, setEmail, password, setPassword }) => {
         placeholder="Password"
         value={password}
         required
-        onChange={defaultFormValue(setPassword)}
+        onChange={defaultFormValue(setMessage, setPassword)}
       />
+      {message ? <p className="loginform__message">{message}</p> : <></>}
       <input className="microblog__button loginform__submit" type="submit" value="Login" />
       <Link className="loginform__link" to="/register">
         Not a user? Register
@@ -84,6 +90,7 @@ const LoginForm = ({ email, setEmail, password, setPassword }) => {
 };
 
 const RegisterForm = ({ username, setUsername, email, setEmail, password, setPassword }) => {
+  const [message, setMessage] = useState("");
   function registerUser(event) {
     event.preventDefault();
     fetch("/register", {
@@ -105,11 +112,13 @@ const RegisterForm = ({ username, setUsername, email, setEmail, password, setPas
           const form = document.getElementById("registerform");
           if (data.email) {
             form.elements["email"].setCustomValidity("Email already in use");
+            setMessage("Email already in use");
           } else {
             if (data.errors) {
               data.errors.forEach((err) => {
                 form.elements[err.param].setCustomValidity(err.msg);
               });
+              setMessage("Check your inputs");
             }
           }
         }
@@ -128,7 +137,7 @@ const RegisterForm = ({ username, setUsername, email, setEmail, password, setPas
         value={username}
         required
         autoFocus
-        onChange={defaultFormValue(setUsername)}
+        onChange={defaultFormValue(setMessage, setUsername)}
       />
       <input
         className="loginform__field"
@@ -137,7 +146,7 @@ const RegisterForm = ({ username, setUsername, email, setEmail, password, setPas
         placeholder="Email"
         value={email}
         required
-        onChange={defaultFormValue(setEmail)}
+        onChange={defaultFormValue(setMessage, setEmail)}
       />
       <input
         className="loginform__field"
@@ -146,7 +155,7 @@ const RegisterForm = ({ username, setUsername, email, setEmail, password, setPas
         placeholder="Password"
         value={password}
         required
-        onChange={defaultFormValue(setPassword)}
+        onChange={defaultFormValue(setMessage, setPassword)}
       />
       <input
         className="loginform__field"
@@ -157,12 +166,15 @@ const RegisterForm = ({ username, setUsername, email, setEmail, password, setPas
         onChange={(e) => {
           if (password !== e.target.value) {
             e.target.setCustomValidity("Passwords Don't Match");
+            setMessage("Passwords Don't Match");
           } else {
             e.target.setCustomValidity("");
+            setMessage("");
           }
           setPassword2(e.target.value);
         }}
       />
+      {message ? <p className="loginform__message">{message}</p> : <></>}
       <input className="microblog__button loginform__submit" type="submit" value="Register" />
       <Link className="loginform__link" to="/login">
         Already a user? Login

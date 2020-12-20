@@ -1,27 +1,48 @@
+const { body } = require("express-validator");
 const React = require("react");
 const { useState, useEffect } = React;
 const { MAX_POST_LENGTH } = require("../constants");
 require("../../css/userbar.css");
 const { mouseDrag } = require("../utils");
 
-const PostForm = (props) => {
+const PostForm = ({ user: { id }, posts, setPosts }) => {
   const [textvalue, setTextval] = useState("");
 
   const handleChange = (event) => {
     setTextval(event.target.value.slice(0, MAX_POST_LENGTH));
   };
 
-  const handleSubmit = (event) => {
-    alert("Submit!");
-  };
+  function postNew(event) {
+    event.preventDefault();
+    if (textvalue.length > 0) {
+      fetch("/post", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: id, content: textvalue }),
+      }).then((res) => {
+        if (res.status === 200) {
+          res.json().then((newPost) => {
+            const newPosts = [newPost, ...posts];
+            setPosts(newPosts);
+            setTextval("");
+          });
+        }
+      });
+    }
+  }
+
   return (
-    <form className="userbar__form" onSubmit={handleSubmit}>
+    <form className="userbar__form" onSubmit={postNew}>
       <textarea
         className="userbar__post"
-        name="post"
+        name="content"
         value={textvalue}
         onChange={handleChange}
         placeholder="What do you think?"
+        autoFocus
       ></textarea>
       <input
         type="submit"
@@ -51,7 +72,9 @@ const Actions = (props) => {
   );
 };
 
-const Userbar = ({ user: { username } }) => {
+const Userbar = (props) => {
+  const { user } = props;
+  const { username } = user;
   const [bar, setBar] = useState({
     width: "",
     initialWidth: null,
@@ -84,7 +107,7 @@ const Userbar = ({ user: { username } }) => {
       >
         <h1 className="userbar__logo">Microblog</h1>
         <h2 className="userbar__hello">Hi, {username}</h2>
-        <PostForm />
+        <PostForm {...props} />
         <Actions />
         <div className="userbar__resize--bar" onMouseDown={resizeUserBar}></div>
       </div>
