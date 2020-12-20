@@ -2,15 +2,8 @@ const express = require("express");
 const session = require("express-session");
 const path = require("path");
 const createError = require("http-errors");
-//var express = require("express");
-//var path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
-//const Promise = require("bluebird");
-
-// Include external files (edit as required)
-//var indexRouter = require("./routes/index");
-//var postsRouter = require("./routes/posts");
 
 const { MAX_POST_LENGTH } = require(path.join(__dirname, "public", "js", "constants"));
 
@@ -165,17 +158,12 @@ app.use(cookieParser());
 //app.set('trust proxy', 1) // trust first proxy
 app.use(
   session({
-    secret: "asdf",
+    secret: process.env.SECRET || "Howdy",
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false, sameSite: "strict" }, //trust proxy needed for secure: true
   })
 );
-// app.use(express.static(path.join(__dirname, "public")));
-
-// Define routes (edit as required)
-// app.use("/", indexRouter);
-// app.use("/posts", postsRouter);
 
 function mustBeLoggedIn(req, res, next) {
   if (req.session.user) {
@@ -367,54 +355,6 @@ app.post(
     res.sendStatus(200);
   }
 );
-
-/*
-var ssn;
-app.get('/',function(req,res) { 
-  ssn = req.session; 
-  if(ssn.email) {
-    res.redirect('/admin');
-  } else {
-    res.render('index.html');
-  }
-});
-app.post('/login',function(req,res){
-  ssn = req.session;
-  ssn.email=req.body.email;
-  res.end('done');
-});
-app.get('/admin',function(req,res){
-  ssn = req.session;
-  if(ssn.email) {
-    res.write('<h1>Hello '+ssn.email+'</h1>');
-    res.end('<a href="+">Logout</a>');
-  } else {
-    res.write('<h1>login first.</h1>');
-    res.end('<a href="+">Login</a>');
-  }
-});
-app.get('/logout',function(req,res){
-  req.session.destroy(function(err) {
-    if(err) {
-      console.log(err);
-    } else {
-      res.redirect('/');
-    }
-  });
-});
-
-*/
-
-/*
-// Connect to database
-var db = require("./db");
-db.connect(db.urlbuilder(), function (err) {
-  if (err) {
-    console.log("Unable to connect to Mongo.");
-    process.exit(1);
-  }
-});
-*/
 
 // Catch 404 and forward to error handler - default
 app.use(function (req, res, next) {
