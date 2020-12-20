@@ -4,7 +4,7 @@ Microblogging site for Web Applications-course
 
 ## Installing
 
-Requires npm package manager.
+Requires npm package manager and node version >= 10
 
 ```
 git clone https://github.com/marklepp/microblog.git
