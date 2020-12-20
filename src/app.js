@@ -429,7 +429,7 @@ app.use(function (err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.write("<h1>error: " + err.status + "</h1>");
+  res.write("<h1>error: " + (err.status || 500) + "</h1>");
   res.end();
 });
 

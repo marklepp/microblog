@@ -4,9 +4,6 @@ const { BrowserRouter, Switch, Route, Link } = require("react-router-dom");
 const Router = BrowserRouter;
 const ReactDom = require("react-dom");
 
-const { Provider } = require("react-redux");
-const store = require("./redux/store");
-
 require("../css/main.css");
 
 //const LoginForm = require("./components/LoginForm");
@@ -209,9 +206,7 @@ const App = () => {
 
 ReactDom.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
+    <App />
   </React.StrictMode>,
   document.getElementById("root")
 );

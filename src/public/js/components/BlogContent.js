@@ -1,7 +1,6 @@
 const React = require("react");
 const { useState } = React;
 require("../../css/blogcontent.css");
-const { genId } = require("../utils");
 
 const defaultFormValue = (messageSetter, setter) => (e) => {
   e.target.setCustomValidity("");

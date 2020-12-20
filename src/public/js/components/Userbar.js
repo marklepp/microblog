@@ -1,6 +1,5 @@
-const { body } = require("express-validator");
 const React = require("react");
-const { useState, useEffect } = React;
+const { useState } = React;
 const { MAX_POST_LENGTH } = require("../constants");
 require("../../css/userbar.css");
 const { mouseDrag } = require("../utils");

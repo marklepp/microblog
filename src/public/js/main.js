@@ -2,9 +2,6 @@ const React = require("react");
 const ReactDom = require("react-dom");
 const { useState } = React;
 
-const { Provider } = require("react-redux");
-const store = require("./redux/store");
-
 require("../css/main.css");
 
 const Userbar = require("./components/Userbar");
@@ -116,9 +113,7 @@ const App = () => {
 
 ReactDom.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
+    <App />
   </React.StrictMode>,
   document.getElementById("root")
 );
