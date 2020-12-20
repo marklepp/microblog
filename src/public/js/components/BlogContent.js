@@ -3,122 +3,6 @@ const { useState } = React;
 require("../../css/blogcontent.css");
 const { genId } = require("../utils");
 
-const getTestPosts = () => {
-  return [
-    {
-      id: genId(),
-      username: "Some Person",
-      content: "meh.",
-      comments: [
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-      ],
-    },
-    {
-      id: genId(),
-      username: "Some Person",
-      content: "meh.",
-      comments: [
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-      ],
-    },
-    {
-      id: genId(),
-      username: "Some Person",
-      content: "meh.",
-      comments: [
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-      ],
-    },
-    {
-      id: genId(),
-      username: "Some Person",
-      content: "meh.",
-      comments: [
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-      ],
-    },
-    {
-      id: genId(),
-      username: "Some Person",
-      content: "meh. here's some more text for you",
-      comments: [
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-        {
-          id: genId(),
-          username: "John Smith",
-          content:
-            "something lorem ipsum dolor sit amet this is a longer comment for testing how the system will break them",
-        },
-        { id: genId(), username: "Tom Jones", content: "other" },
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-      ],
-    },
-    {
-      id: genId(),
-      username: "Some Person",
-      content: "meh.",
-      comments: [
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-      ],
-    },
-    {
-      id: genId(),
-      username: "Some Person",
-      content: "meh.",
-      comments: [
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-      ],
-    },
-    {
-      id: genId(),
-      username: "Some Person",
-      content:
-        "something lorem ipsum dolor sit amet this is a longer comment for testing how the system will break themsomething lorem ipsum dolor sit amet this is",
-      comments: [
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-      ],
-    },
-    {
-      id: genId(),
-      username: "Some Person",
-      content: "meh.",
-      comments: [
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-      ],
-    },
-    {
-      id: genId(),
-      username: "Some Person",
-      content: "meh.",
-      comments: [
-        { id: genId(), username: "John Smith", content: "something" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-        { id: genId(), username: "Tom Jones", content: "other" },
-      ],
-    },
-  ];
-};
-
 const defaultFormValue = (messageSetter, setter) => (e) => {
   e.target.setCustomValidity("");
   messageSetter("");
@@ -143,7 +27,7 @@ const BlogComments = ({ comments }) => {
       ))}
       <form onSubmit={postComment} className="blogcontent__commentform">
         <input
-          className="blogcontent__commentinput userbar__post"
+          className="blogcontent__commentinput"
           type="text"
           name="content"
           value={comment}
@@ -153,7 +37,7 @@ const BlogComments = ({ comments }) => {
         <input
           type="submit"
           value="Comment"
-          className="microblog__button userbar__button userbar__button--publish blogcontent__commentsubmit"
+          className="microblog__button blogcontent__commentsubmit"
         />
       </form>
     </div>
